@@ -1,9 +1,6 @@
-
 class Apple:
-    def __init__(self, runner, field):
-        self.runner = runner
+    def __init__(self, field):
         self.field = field
 
     def eat_me(self):
-        self.runner.removeMe()
-        self.field.removeApple()
+        self.field.removeAnything()

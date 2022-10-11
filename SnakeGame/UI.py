@@ -25,12 +25,18 @@ class UI:
         self.side_length = 25
         self.margin = 3
 
+        self.define_x_y_of_the_field()
+
 
     def updateWindow(self,snake):
         clock = pygame.time.Clock()
-        FPS = 2
+        FPS = 60
+        counter = 0
+        self.board.add_apple()
         while self.running:
+            counter += 1
             clock.tick(FPS)
+            self.drawBoard(self.board)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -44,26 +50,35 @@ class UI:
                 snake.setDirection(2)
             if keys[pygame.K_UP]:
                 snake.setDirection(3)
+            if counter % 20 == 0:
+                snake.run()
             pygame.display.update()
 
-    def getVertices(self,x_top_left, y_top_left,side_length):
+    def getVertices(self, x_top_left, y_top_left):
 
-        return [[x_top_left, y_top_left], [x_top_left + side_length, y_top_left],
-                    [x_top_left + side_length, y_top_left + side_length], [x_top_left, y_top_left + side_length]]
+        return [[x_top_left, y_top_left],
+                [x_top_left + self.side_length, y_top_left],
+                [x_top_left + self.side_length, y_top_left + self.side_length],
+                [x_top_left, y_top_left + self.side_length]]
 
-    def drawSquare(self, x_top_left, y_top_left, side_length, color):
-        vertices = self.getVertices(x_top_left,y_top_left,side_length)
+    def drawSquare(self, x_top_left, y_top_left, color):
+        vertices = self.getVertices(x_top_left,y_top_left)
         pygame.draw.polygon(self.screen, color, vertices)
 
-    def get_coordinates(self, row, column, x_center, y_center):
-        x_pivot = x_center - (self.board.rows*(self.side_length + self.margin))/2
-        y_pivot = y_center - (self.board.cols*(self.side_length + self.margin))/2
+    def get_coordinates(self, row, column):
+        x_pivot = self.width/2 - (self.board.rows*(self.side_length + self.margin))/2
+        y_pivot = self.height/2 - (self.board.columns*(self.side_length + self.margin))/2
         top_left_x = column * (self.side_length + self.margin)
         top_left_y = row * (self.side_length + self.margin)
         return x_pivot + top_left_x, y_pivot + top_left_y
 
+    def define_x_y_of_the_field(self):
+        for field in self.board.fields:
+            field.x, field.y = self.get_coordinates(field.row, field.col)
+
     def drawBoard(self, board):
         for field in board.fields:
-            top_left_x, top_left_y = self.get_coordinates(field.row, field.col)
-            field.setGraphic(self)
-            self.drawSquare(top_left_x, top_left_y, self.side_length, (190,190,190))
+            self.drawSquare(field.x, field.y, field.color)
+
+    def endGame(self):
+        self.running = False

@@ -11,5 +11,5 @@ if __name__ == '__main__':
     board = Board()
     ui = UI(screenWidth, screenHeight,board)
     ui.drawBoard(board)
-    snake = Snake(board.get_field(10,10),board)
+    snake = Snake(board.get_field(10, 10), board, UI)
     ui.updateWindow(snake)
