@@ -38,10 +38,10 @@ class Field:
 
 
 class Board:
-    def __init__(self):
+    def __init__(self, rows, columns):
         self.fields = []
-        self.rows = 20
-        self.columns = 20
+        self.rows = rows
+        self.columns = columns
 
         for row in range(self.rows):
             for column in range(self.columns):

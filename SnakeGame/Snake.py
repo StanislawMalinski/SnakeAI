@@ -82,4 +82,4 @@ class Snake:
         self.board.get_field(row, col).setSomething(self)
 
     def die(self):
-        self.UI.endGame()
+        self.UI.endGame(self)

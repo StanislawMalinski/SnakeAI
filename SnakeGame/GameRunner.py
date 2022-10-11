@@ -8,7 +8,7 @@ if __name__ == '__main__':
     screenWidth = 1000
     screenHeight = 800
     pygame.init()
-    board = Board()
+    board = Board(20,20)
     ui = UI(screenWidth, screenHeight,board)
     ui.drawBoard(board)
     snake = Snake(board.get_field(10, 10), board, UI)

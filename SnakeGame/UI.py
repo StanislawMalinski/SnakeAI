@@ -1,3 +1,5 @@
+import time
+
 import pygame
 import math
 
@@ -81,4 +83,5 @@ class UI:
             self.drawSquare(field.x, field.y, field.color)
 
     def endGame(self):
+        time.sleep(10)
         self.running = False
