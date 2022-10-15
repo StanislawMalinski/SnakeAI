@@ -11,15 +11,11 @@ class SnakeSegment:
 
     def addToCounter(self):
         self.counter += 1
-        if self.last_segment is not None:
-            self.last_segment.addToCounter()
 
     def tic(self):
         self.counter -= 1
-        if self.counter <= 0:
+        if self.counter == 0:
             self.field.removeAnything()
-        elif self.last_segment is not None:
-            self.last_segment.tic()
 
 
 class Snake:
@@ -60,26 +56,32 @@ class Snake:
                 self.die()
             else:
                 self.set_head_field(row - 1, col)
-        if isinstance(self.last_segment, SnakeSegment):
-            self.last_segment.tic()
+        segment = self.last_segment
+        while segment is not None:
+            segment.tic()
+            segment = segment.last_segment
 
     def set_head_field(self, row, col):
-        newSeg = self.board.get_field(row, col)
+        new_tile = self.board.get_field(row, col)
 
-        if newSeg.contains_snake():
+        if new_tile.contains_snake():
             self.die()
-
-        if newSeg.contains_apple():
+        elif new_tile.contains_apple():
             self.length += 1
-            newSeg.removeAnything()
+            new_tile.removeAnything()
             self.board.add_apple()
-            self.last_segment.addToCounter()
+            segment = self.last_segment
+            while segment is not None:
+                segment.addToCounter()
+                segment = segment.last_segment
 
         seg = SnakeSegment(self.length - 1, self.last_segment, self.field_of_head)
-        self.field_of_head.setSomething(seg)
+
+        new_tile.setSomething(self)
+
         self.last_segment = seg
-        self.field_of_head = newSeg
-        self.board.get_field(row, col).setSomething(self)
+
+        self.field_of_head = new_tile
 
     def die(self):
-        self.UI.endGame()
+        self.UI.endGame(self)
