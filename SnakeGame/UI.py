@@ -1,7 +1,7 @@
-import time
-
 import pygame
 import math
+
+from pygame import QUIT
 
 from SnakeGame.Board import Board
 from SnakeGame.Snake import Snake
@@ -34,7 +34,6 @@ class UI:
         clock = pygame.time.Clock()
         FPS = 60
         counter = 0
-        self.board.add_apple()
         while self.running:
             counter += 1
             clock.tick(FPS)
@@ -52,7 +51,8 @@ class UI:
                 snake.setDirection(2)
             if keys[pygame.K_UP]:
                 snake.setDirection(3)
-            if counter % 20 == 0:
+
+            if counter % 5 == 0:
                 snake.run()
             pygame.display.update()
 
@@ -83,5 +83,5 @@ class UI:
             self.drawSquare(field.x, field.y, field.color)
 
     def endGame(self):
-        time.sleep(10)
         self.running = False
+        pygame.event.post(pygame.event.Event(pygame.QUIT))
