@@ -69,7 +69,11 @@ def get_df(weights_in, biases_in):
             b = Series(biases_l[neuron])
             s = pd.concat([w, b], ignore_index=True)
 
-            df[str(layer) + " " + str(neuron)] = s
+            #pd.concat((df,s),axis=0)
+
+            column_name = str(layer) + " " + str(neuron)
+
+            df[column_name] = s
 
     return df
 

@@ -70,6 +70,7 @@ class Snake:
             self.length += 1
             new_tile.removeAnything()
             self.board.add_apple()
+            self.board.NonRepeatingCounter = 0
             segment = self.last_segment
             while segment is not None:
                 segment.addToCounter()

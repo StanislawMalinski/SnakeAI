@@ -26,6 +26,8 @@ class AI_UI:
         self.side_length = 25
         self.margin = 3
 
+        self.number_of_moves = 0
+
         self.network = network
 
         self.define_x_y_of_the_field()
@@ -34,6 +36,7 @@ class AI_UI:
 
     def updateWindow(self, snake):
         counter = 0
+        self.NonRepeatingCounter = 0
         self.board.add_apple()
         while self.running:
             counter += 1
@@ -45,6 +48,11 @@ class AI_UI:
             input_matrix = self.get_input_matrix(snake.field_of_head)
             result = self.network.evaluate_at(input_matrix)
             choice = self.interpret_result(result)
+
+            self.NonRepeatingCounter += 1
+
+            if self.NonRepeatingCounter >= 500:
+                self.endGame(snake)
 
             snake.setDirection(choice)
 
@@ -65,39 +73,33 @@ class AI_UI:
 
                 if x + col < 0 or x + col >= self.board.rows or y + row < 0 or y + row >= self.board.rows:
                     result.append(0)
+                    result.append(0)
                     continue
 
                 field = self.board.get_field(x+col, y+row)
 
                 if field.contains_apple():
                     result.append(1)
+                    result.append(0)
                 elif field.contains_snake():
-                    result.append(0.8)
+                    result.append(1)
+                    result.append(0)
                 else:
-                    result.append(0.2)
+                    result.append(1)
+                    result.append(1)
 
         return numpy.matrix(result)
 
     def interpret_result(self, result):
-        sum = 0
         list = result.tolist()
         list = list[0]
 
-        for res in list:
-            sum += math.exp(res)
-        interpreted = []
+        max = 0
 
-        for res in list:
-            interpreted.append(math.exp(res) / sum)
-
-        choice = random.random()
-        sum = 0
-
-        for threshold_index in range(len(interpreted)):
-            sum += interpreted[threshold_index]
-            if choice < sum:
-                return threshold_index
-        return len(interpreted) - 1
+        for threshold_ind in range(len(list)):
+            if list[threshold_ind] > list[max]:
+                max = threshold_ind
+        return max
 
     def getVertices(self, x_top_left, y_top_left):
 

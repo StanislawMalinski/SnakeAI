@@ -1,7 +1,5 @@
-
 from pandas import read_csv
 import matplotlib.pyplot as plt
-
 
 from AI.AI_UI import AI_UI
 from AI.DataFrameFileTranslator import get_weights_and_biases
@@ -11,67 +9,67 @@ from SnakeGame.Board import Board
 from SnakeGame.Snake import Snake
 
 
+def to_str_arr(arr):
+    n_arr = []
+    for el in arr:
+        n_arr.append(str(el))
+    return n_arr
+
+
 class ManagerAI:
     def __init__(self, number_of_players_in_session, number_of_iteration, root=None):
         self.results = []
-        best = None
+        self.best = None
+        distribution = (240, 80, 80, 4)
         for iteration in range(number_of_iteration):
-            scores = []
             threads = []
+            if root is None:
+                root = NeuralNetwork(distribution)
             for p in range(number_of_players_in_session):
-                if root == None:
-                    player = NeuralNetwork((120, 10, 10, 4))
+                if p == 0:
+                    player = NeuralNetwork(distribution, parent=root)
                 else:
-                    if p == 0:
-                        player = NeuralNetwork((120, 10, 10, 4), parent=root, noise=0)
-                    else:
-                        player = NeuralNetwork((120, 10, 10, 4), parent=root)
+                    player = NeuralNetwork(distribution, parent=root, noise=0.1)
                 board = Board(20, 20)
                 ui = AI_UI(1000, 900, board, player)
                 snake = Snake(board.get_field(10, 10), board, ui)
-                #ui.updateWindow(snake)
                 thread = ThreadAI(ui, snake, player)
                 thread.start()
                 threads.append(thread)
+                #ui.updateWindow(snake)
+                #scores.append([snake.length, player])
 
-            for thread in threads:
-                thread.join()
-                scores.append([thread.snake.length, thread.player])
-            best = scores[0]
-            for df in scores:
-                if best[0] < df[0]:
-                    best = df
-            print(best[0])
-            self.results.append(best[0])
-            root = best[1]
+            self.best = threads[0]
+            for el in threads:
+                el.join()
+                score = el.snake.length - 2
+                if self.best.snake.length - 2 < score:
+                    self.best = el
+            print("Best out of batch: " + str(self.best.snake.length - 2))
+            self.results = self.best.snake.length - 2
+            root = self.best.player
+
+        df = self.best.player.toDataFrame()
+
+        df.to_csv(
+            "C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\BestOfIteration10.csv")
 
 
-        df = best[1].toDataFrame()
+result = []
 
-        df.to_csv("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\BestOfIteration" + str(number_of_iteration) + ".csv")
-'''
-                df = player.toDataFrame()
-                if os.path.exists("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\TMP" + str(p) + ".csv"):
-                    os.remove("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\TMP" + str(p) + ".csv")
-
-                f = open("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\TMP" + str(p) + ".csv", "x")
-
-                df.to_csv("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\TMP" + str(p) + ".csv")
-                scores.append(("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\TMP" + str(p) + ".csv", snake.length))
-                '''
-
-df = read_csv("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\BestOfIteration1000.csv")
+df = read_csv("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\BestOfIteration10.csv")
 
 weights, biases = get_weights_and_biases(df)
 
 net = NeuralNetwork(weights_of_the_layers=weights, biases_of_the_layer=biases)
 
-man = ManagerAI(100, 1000, root=net)
+#net = NeuralNetwork((240, 80, 80, 4))
 
+while True:
+    simulation = ManagerAI(10, 10, root=net)
 
-plt.plot( range(len(man.results)),man.results)
-plt.ylabel('length of snake')
-plt.xlabel('iteration')
+    net = simulation.best.player
 
-plt.show()
+    df = net.toDataFrame()
 
+    df.to_csv("C:\\Users\\Staszek\\PycharmProjects\\AISnake\\AI\\BestOfIteration10.csv")

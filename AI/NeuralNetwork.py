@@ -1,9 +1,9 @@
 import math
 
 import numpy as np
-from numpy import savetxt
+from numpy import savetxt, matrix
 
-from AI.DataFrameFileTranslator import get_df, to_df, get_weights_and_biases
+from AI.DataFrameFileTranslator import get_df
 
 
 def activation_f(x):
@@ -11,7 +11,7 @@ def activation_f(x):
 
 
 class NeuralNetwork:
-    def __init__(self, neuron_distribution_in_layers=(1, 1), data_frame=None, parent=None, noise=0.01, weights_of_the_layers=None, biases_of_the_layer=None):
+    def __init__(self, neuron_distribution_in_layers=(1, 1), data_frame=None, parent=None, noise=0, weights_of_the_layers=None, biases_of_the_layer=None):
         self.weights_of_the_layers = []
         self.biases_of_the_layer = []
         self.number_of_layers = len(neuron_distribution_in_layers) - 1
@@ -24,17 +24,34 @@ class NeuralNetwork:
             self.weights_of_the_layers = weights_of_the_layers
             self.biases_of_the_layer = biases_of_the_layer
             self.get_distribution()
+            if noise > 0:
+                for index in range(len(weights_of_the_layers)):
+                    mat = self.weights_of_the_layers[index]
+                    shape_w = mat.shape
+                    noise_mat = np.matrix(np.random.random(shape_w) * noise - noise / 2)
+                    res = mat + noise_mat
+                    self.weights_of_the_layers[index] = res
+
+                for index in range(len(biases_of_the_layer)):
+                    mat = biases_of_the_layer[index]
+                    shape_b = mat.shape
+                    self.biases_of_the_layer[index] = np.add(mat, np.random.random(shape_b) * noise - noise / 2)
             return
 
         if parent is not None:
-            for mat in parent.weights_of_the_layers:
+            for weights in parent.weights_of_the_layers:
+                mat = weights.copy()
                 shape_w = mat.shape
-                self.weights_of_the_layers.append(
-                    mat + np.random.random(shape_w) * noise - noise / 2)
-            for mat in parent.biases_of_the_layer:
+                noise_mat = np.matrix(np.random.random(shape_w) * noise - noise / 2)
+                res = mat + noise_mat
+                self.weights_of_the_layers.append(res)
+
+            for biases in parent.biases_of_the_layer:
+                mat = biases.copy()
                 shape_b = mat.shape
-                self.biases_of_the_layer.append(
-                    mat + np.random.random(shape_b) * noise - noise / 2)
+                noise_mat = np.random.random(shape_b) * noise - noise / 2
+                res = mat + noise_mat
+                self.biases_of_the_layer.append(res)
             return
 
         if data_frame is None and parent is None and weights_of_the_layers is None and biases_of_the_layer is None:

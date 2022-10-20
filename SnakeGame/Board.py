@@ -48,7 +48,7 @@ class Board:
         for row in range(self.rows):
             for column in range(self.columns):
                 self.fields.append(Field(row, column))
-        for i in range(50):
+        for i in range(4):
             self.add_apple()
 
         self.mixed_fields = self.fields
